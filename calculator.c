@@ -15,7 +15,7 @@ int performOperation(int operandA, int operandB, char operatorChar)
     switch (operatorChar)
     {
     case '+':
-        return operandA + operandB;
+        return operandA + operandB;  
     case '-':
         return operandA - operandB;
     case '*':
