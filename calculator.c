@@ -1,117 +1,181 @@
 #include <stdio.h>
-#include <ctype.h>
 #include <stdlib.h>
-#define MAX_SIZE 100
+#include <string.h>
 
-int operation(int a, int b, char op)
+#define MAX_BUFFER_SIZE 100
+#define OPERATORS "+-*/"
+
+int isDigit(char ch)
 {
-    switch (op)
+    return (ch >= '0' && ch <= '9');
+}
+
+int performOperation(int operandA, int operandB, char operatorChar)
+{
+    switch (operatorChar)
     {
     case '+':
-        return a + b;
+        return operandA + operandB;
     case '-':
-        return a - b;
+        return operandA - operandB;
     case '*':
-        return a * b;
+        return operandA * operandB;
     case '/':
-        if (b == 0)
+        if (operandB == 0)
         {
             printf("Error: Division by zero.\n");
             exit(1);
         }
-        return a / b;
+        return operandA / operandB;
     default:
         return 0;
     }
 }
 
-int precedence(char op)
+int getPrecedence(char operatorChar)
 {
-    if (op == '+' || op == '-')
-        return 1;
-    if (op == '*' || op == '/')
+    if (operatorChar == '/')
+        return 4;
+    if (operatorChar == '*')
+        return 3;
+    if (operatorChar == '+')
         return 2;
+    if (operatorChar == '-')
+        return 1;
     return 0;
 }
 
-int evaluate(char *exp)
+void skipWhitespace(char *expression, int *iteratorI)
 {
-    int stack1[MAX_SIZE], top1 = -1;
-    char stack2[MAX_SIZE], top2 = -1;
-    int i = 0;
-    int lastOperator = 1;
-    while (exp[i] != '\0' && exp[i] != '\n')
+    while (expression[*iteratorI] == ' ')
     {
-        if (exp[i] == ' ')
+        (*iteratorI)++;
+    }
+}
+
+int handleNegativeNumbers(char *expression, int *iteratorI, int *isLastOperator)
+{
+    if (expression[*iteratorI] == '-' && (*iteratorI == 0 || *isLastOperator))
+    {
+        (*iteratorI)++;
+        int number = 0;
+        while (isDigit(expression[*iteratorI]))
         {
-            i++;
+            number = number * 10 + (expression[*iteratorI] - '0');
+            (*iteratorI)++;
+        }
+        *isLastOperator = 0;
+        return -number;
+    }
+    return 0;
+}
+
+int handleOperands(char *expression, int *iteratorI)
+{
+    int number = 0;
+    while (isDigit(expression[*iteratorI]))
+    {
+        number = number * 10 + (expression[*iteratorI] - '0');
+        (*iteratorI)++;
+    }
+    return number;
+}
+
+void handleOperator(char *expression, int *iteratorI, int *operandStack, int *operandTop, int *operatorStack, int *operatorTop, int *isLastOperator)
+{
+    while (*operatorTop != -1 && getPrecedence(operatorStack[*operatorTop]) >= getPrecedence(expression[*iteratorI]))
+    {
+        int operandB = operandStack[*operandTop];
+        (*operandTop)--;
+
+        int operandA = operandStack[*operandTop];
+        (*operandTop)--;
+
+        char operatorChar = operatorStack[*operatorTop];
+        (*operatorTop)--;
+
+        operandStack[++(*operandTop)] = performOperation(operandA, operandB, operatorChar);
+    }
+
+    operatorStack[++(*operatorTop)] = expression[*iteratorI];
+    *isLastOperator = 1;
+}
+
+void evaluateRemainingOperator(int *operandStack, int *operandTop, int *operatorStack, int *operatorTop)
+{
+    while (*operatorTop != -1)
+    {
+        int operandB = operandStack[*operandTop];
+        (*operandTop)--;
+
+        int operandA = operandStack[*operandTop];
+        (*operandTop)--;
+
+        char operatorChar = operatorStack[*operatorTop];
+        (*operatorTop)--;
+
+        operandStack[++(*operandTop)] = performOperation(operandA, operandB, operatorChar);
+    }
+}
+
+int evaluateExpression(char *expression)
+{
+    int operandStack[MAX_BUFFER_SIZE], operandTop = -1;
+    int operatorStack[MAX_BUFFER_SIZE], operatorTop = -1;
+    int iteratorI = 0;
+    int isLastOperator = 1;
+
+    while (expression[iteratorI] != '\0' && expression[iteratorI] != '\n')
+    {
+        skipWhitespace(expression, &iteratorI);
+
+        int negativeNumber = handleNegativeNumbers(expression, &iteratorI, &isLastOperator);
+        if (negativeNumber != 0)
+        {
+            operandStack[++operandTop] = negativeNumber;
             continue;
         }
-        if (exp[i] == '-' && (i == 0 || lastOperator))
+
+        if (isDigit(expression[iteratorI]))
         {
-            i++;
-            int num = 0;
-            while (isdigit(exp[i]))
-            {
-                num = num * 10 + (exp[i] - '0');
-                i++;
-            }
-            stack1[++top1] = -num;
-            lastOperator = 0;
+            int number = handleOperands(expression, &iteratorI);
+            operandStack[++operandTop] = number;
+            isLastOperator = 0;
             continue;
         }
-        if (isdigit(exp[i]))
+
+        if (strchr(OPERATORS, expression[iteratorI]))
         {
-            int num = 0;
-            while (isdigit(exp[i]))
-            {
-                num = num * 10 + (exp[i] - '0');
-                i++;
-            }
-            stack1[++top1] = num;
-            lastOperator = 0;
-            continue;
-        }
-        if (exp[i] == '+' || exp[i] == '-' || exp[i] == '*' || exp[i] == '/')
-        {
-            if (lastOperator)
+            if (isLastOperator)
             {
                 printf("Error: Invalid expression.\n");
                 exit(1);
             }
-            while (top2 != -1 && precedence(stack2[top2]) >= precedence(exp[i]))
-            {
-                int b = stack1[top1--];
-                int a = stack1[top1--];
-                char op = stack2[top2--];
-                stack1[++top1] = operation(a, b, op);
-            }
-            stack2[++top2] = exp[i];
-            lastOperator = 1;
+
+            handleOperator(expression, &iteratorI, operandStack, &operandTop, operatorStack, &operatorTop, &isLastOperator);
         }
         else
         {
             printf("Error: Invalid expression.\n");
             exit(1);
         }
-        i++;
+
+        iteratorI++;
     }
-    while (top2 != -1)
-    {
-        int b = stack1[top1--];
-        int a = stack1[top1--];
-        char op = stack2[top2--];
-        stack1[++top1] = operation(a, b, op);
-    }
-    return stack1[0];
+
+    evaluateRemainingOperator(operandStack, &operandTop, operatorStack, &operatorTop);
+
+    return operandStack[operandTop];
 }
 
 int main()
 {
-    char exp[MAX_SIZE];
+    char inputExpression[MAX_BUFFER_SIZE];
     printf("Enter your expression: ");
-    fgets(exp, MAX_SIZE, stdin);
-    int res = evaluate(exp);
-    printf("Output: %d\n", res);
+    fgets(inputExpression, MAX_BUFFER_SIZE, stdin);
+    system("clear");
+    int result = evaluateExpression(inputExpression);
+    printf("Output: %d\n", result);
+
     return 0;
 }
