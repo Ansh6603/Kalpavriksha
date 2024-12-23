@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #define FILENAME "users.txt"
 
 typedef struct
@@ -10,26 +11,36 @@ typedef struct
     int userAge;
 } User;
 
-void readAndPrint(const char *inputMsg, const char *outputMsg, void *input, char type)
+int compareStrings(const char *str1, const char *str2)
+{
+    while (*str1 && (*str1 == *str2))
+    {
+        str1++;
+        str2++;
+    }
+    return *(unsigned char *)str1 - *(unsigned char *)str2;
+}
+
+void readAndPrint(const char *inputMsg, const char *outputMsg, void *input, const char *type)
 {
     printf("%s", inputMsg);
 
-    if (type == 'i')
+    if (compareStrings(type, "typeInt") == 0)
     {
         scanf("%d", (int *)input);
     }
-    else if (type == 's')
+    else if (compareStrings(type, "typeString") == 0)
     {
         scanf("%s", (char *)input);
     }
 
     printf("%s", outputMsg);
 
-    if (type == 'i')
+    if (compareStrings(type, "typeInt") == 0)
     {
         printf("%d\n", *(int *)input);
     }
-    else if (type == 's')
+    else if (compareStrings(type, "typeString") == 0)
     {
         printf("%s\n", (char *)input);
     }
@@ -77,7 +88,7 @@ void addUser()
         return;
     }
 
-    readAndPrint("Enter user ID: ", "User ID: ", &newUser.userId, 'i');
+    readAndPrint("Enter user ID: ", "User ID: ", &newUser.userId, "typeInt");
 
     if (checkUserIdExists(newUser.userId))
     {
@@ -86,8 +97,8 @@ void addUser()
         return;
     }
 
-    readAndPrint("Enter user name: ", "User Name: ", newUser.userName, 's');
-    readAndPrint("Enter user age: ", "User Age: ", &newUser.userAge, 'i');
+    readAndPrint("Enter user name: ", "User Name: ", newUser.userName, "typeString");
+    readAndPrint("Enter user age: ", "User Age: ", &newUser.userAge, "typeInt");
 
     fprintf(file, "%d %s %d\n", newUser.userId, newUser.userName, newUser.userAge);
     fclose(file);
@@ -123,15 +134,15 @@ void updateUser()
         return;
     }
 
-    readAndPrint("Enter user ID to update: ", "User ID to update: ", &userIdToUpdate, 'i');
+    readAndPrint("Enter user ID to update: ", "User ID to update: ", &userIdToUpdate, "typeInt");
 
     while (fscanf(file, "%d %s %d", &user.userId, user.userName, &user.userAge) != EOF)
     {
         if (user.userId == userIdToUpdate)
         {
             isFound = 1;
-            readAndPrint("Enter new name: ", "New Name: ", user.userName, 's');
-            readAndPrint("Enter new age: ", "New Age: ", &user.userAge, 'i');
+            readAndPrint("Enter new name: ", "New Name: ", user.userName, "typeString");
+            readAndPrint("Enter new age: ", "New Age: ", &user.userAge, "typeInt");
         }
         fprintf(newFile, "%d %s %d\n", user.userId, user.userName, user.userAge);
     }
@@ -163,7 +174,7 @@ void deleteUser()
         return;
     }
 
-    readAndPrint("Enter user ID to delete: ", "User ID to delete: ", &userIdToDelete, 'i');
+    readAndPrint("Enter user ID to delete: ", "User ID to delete: ", &userIdToDelete, "typeInt");
 
     while (fscanf(file, "%d %s %d", &user.userId, user.userName, &user.userAge) != EOF)
     {
@@ -207,7 +218,7 @@ int main()
         printf("4. Delete User\n");
         printf("5. Exit\n");
 
-        readAndPrint("Enter your choice: ", "You selected: ", &choice, 'i');
+        readAndPrint("Enter your choice: ", "You selected: ", &choice, "typeInt");
 
         switch (choice)
         {
