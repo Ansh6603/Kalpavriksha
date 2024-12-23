@@ -1,13 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 #define MAX_BUFFER_SIZE 100
 #define OPERATORS "+-*/"
 
-int isDigit(char ch)
+bool isDigit(char character)
 {
-    return (ch >= '0' && ch <= '9');
+    return (character >= '0' && character <= '9');
 }
 
 int performOperation(int operandA, int operandB, char operatorChar)
@@ -15,7 +16,7 @@ int performOperation(int operandA, int operandB, char operatorChar)
     switch (operatorChar)
     {
     case '+':
-        return operandA + operandB;  
+        return operandA + operandB;
     case '-':
         return operandA - operandB;
     case '*':
@@ -23,8 +24,7 @@ int performOperation(int operandA, int operandB, char operatorChar)
     case '/':
         if (operandB == 0)
         {
-            printf("Error: Division by zero.\n");
-            exit(1);
+            return -1;
         }
         return operandA / operandB;
     default:
@@ -35,13 +35,21 @@ int performOperation(int operandA, int operandB, char operatorChar)
 int getPrecedence(char operatorChar)
 {
     if (operatorChar == '/')
+    {
         return 4;
+    }
     if (operatorChar == '*')
+    {
         return 3;
+    }
     if (operatorChar == '+')
+    {
         return 2;
+    }
     if (operatorChar == '-')
+    {
         return 1;
+    }
     return 0;
 }
 
@@ -79,6 +87,19 @@ int handleOperands(char *expression, int *iteratorI)
         (*iteratorI)++;
     }
     return number;
+}
+
+int customStrchr(const char *inputStr, char searchChar)
+{
+    while (*inputStr)
+    {
+        if (*inputStr == searchChar)
+        {
+            return 1;
+        }
+        inputStr++;
+    }
+    return 0;
 }
 
 void handleOperator(char *expression, int *iteratorI, int *operandStack, int *operandTop, int *operatorStack, int *operatorTop, int *isLastOperator)
@@ -144,7 +165,7 @@ int evaluateExpression(char *expression)
             continue;
         }
 
-        if (strchr(OPERATORS, expression[iteratorI]))
+        if (customStrchr(OPERATORS, expression[iteratorI]))
         {
             if (isLastOperator)
             {
@@ -156,7 +177,7 @@ int evaluateExpression(char *expression)
         }
         else
         {
-            printf("Error: Invalid expression.\n");
+            printf("Error: Invalid operator or Invalid expression.\n");
             exit(1);
         }
 
@@ -173,9 +194,15 @@ int main()
     char inputExpression[MAX_BUFFER_SIZE];
     printf("Enter your expression: ");
     fgets(inputExpression, MAX_BUFFER_SIZE, stdin);
-    system("clear");
     int result = evaluateExpression(inputExpression);
-    printf("Output: %d\n", result);
+    if (result == -1)
+    {
+        printf("Error: Invalid expression or division by zero.\n");
+    }
+    else
+    {
+        printf("Output: %d\n", result);
+    }
 
     return 0;
 }
