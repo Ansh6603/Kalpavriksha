@@ -1,56 +1,59 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void countVowelsAndConsonants(char *inputString) 
+void readInput(char *input, int length) 
 {
-    int vowelCount = 0, consonantCount = 0, iteratorI = 0;
-
-    while (inputString[iteratorI] != '\0') 
+    int iteratorI = 0;
+    char character;
+    while (iteratorI < length && (character = getchar()) != '\n' && character != EOF) 
     {
-        char currentChar = inputString[iteratorI];
+        *(input + iteratorI) = character;
+        iteratorI++;
+    }
+    *(input + iteratorI) = '\0';
+}
+
+void countVowelAndConsonant(char *inputString) 
+{
+    int iteratorI = 0, countVowel = 0, countConsonant = 0;
+    while (*(inputString + iteratorI) != '\0') 
+    {
+        char currentChar = *(inputString + iteratorI);
         if (currentChar >= 'A' && currentChar <= 'Z') 
         {
-            currentChar = currentChar + 32;
+            currentChar += 32;
         }
         if (currentChar >= 'a' && currentChar <= 'z') 
         {
-            if (currentChar == 'a' || currentChar == 'e' || currentChar == 'i' || currentChar == 'o' || currentChar == 'u') 
-            {
-                vowelCount++;
+            if (currentChar == 'a' || currentChar == 'e' || currentChar == 'i' || 
+                currentChar == 'o' || currentChar == 'u') {
+                countVowel++;
             } 
-            else
+            else 
             {
-                consonantCount++;
+                countConsonant++;
             }
         }
         iteratorI++;
     }
-
-    printf("Vowels: %d\n", vowelCount);
-    printf("Consonants: %d\n", consonantCount);
+    printf("Vowel Count: %d\n", countVowel);
+    printf("Consonant Count: %d\n", countConsonant);
 }
 
 int main() 
 {
-    char *inputString;
-    int stringLength;
-
-    printf("Enter the length of the string: ");
-    scanf("%d", &stringLength);
-
-    inputString = (char *)malloc((stringLength + 1) * sizeof(char));
-
-    printf("Enter the string: ");
+    int length;
+    printf("Enter length of the string: ");
+    scanf("%d", &length);
     getchar();
-    for (int iteratorI = 0; iteratorI < stringLength; iteratorI++) 
+    char *inputString = (char *)malloc((length + 1) * sizeof(char));
+    if (inputString == NULL) 
     {
-        scanf("%c", &inputString[iteratorI]);
+        return 1;
     }
-    inputString[stringLength] = '\0';
-
-    countVowelsAndConsonants(inputString);
-
+    printf("Enter the string: ");
+    readInput(inputString, length);
+    countVowelAndConsonant(inputString);
     free(inputString);
-
     return 0;
 }
