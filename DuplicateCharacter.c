@@ -1,60 +1,68 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void findDuplicateCharacters(char *word) 
+void readInputString(char *inputString) 
 {
-    int frequency[256] = {0};
+    int iteratorI = 0;
+    char character;
+    while ((character = getchar()) != '\n' && character != EOF) 
+    {
+        *(inputString+iteratorI) = character;
+        iteratorI++;
+    }
+    inputString[iteratorI] = '\0';
+}
+
+void duplicateCharacter(char *inputString) 
+{
+    int count[256] = {0};
     int iteratorI = 0;
 
-    while (*(word + iteratorI) != '\0') 
+    while (*(inputString+iteratorI) != '\0') 
     {
-        frequency[*(word + iteratorI)]++;
+        char character = *(inputString+iteratorI);
+        if (character >= 'A' && character <= 'Z') 
+        {
+            character = character + 32;
+        }
+
+        if ((character >= 'a' && character <= 'z')) 
+        {
+            count[(unsigned char)character]++;
+        }
         iteratorI++;
     }
 
     printf("Duplicate characters:\n");
-    int foundDuplicate = 0;
-
-    for (iteratorI = 0; iteratorI < 256; iteratorI++) 
+    for (int iteratorJ = 0; iteratorJ < 256; iteratorJ++) 
     {
-        if (frequency[iteratorI] > 1) 
+        if (*(count+iteratorJ) > 1) 
         {
-            printf("%c occurs %d times\n", iteratorI, frequency[iteratorI]);
-            foundDuplicate = 1;
+            printf("%c occurs %d times\n", iteratorJ, *(count+iteratorJ));
         }
-    }
-
-    if (!foundDuplicate) 
-    {
-        printf("No duplicate characters found.\n");
     }
 }
 
-int main()
+int main() 
 {
-    char *word;
     int length;
-
-    printf("Enter the length of the word: ");
+    printf("Enter String length : \n");
     scanf("%d", &length);
+    getchar(); 
 
-    word = (char *)malloc((length + 1) * sizeof(char));
-
-    printf("Enter the word: ");
-    getchar();
-    fgets(word, length + 1, stdin);
-
-    for (int iteratorI = 0; *(word + iteratorI) != '\0'; iteratorI++)
+    char *inputString = (char *)malloc((length + 1) * sizeof(char));
+    if (!inputString) 
     {
-        if (*(word + iteratorI) == '\n') 
-        {
-            *(word + iteratorI) = '\0';
-        }
+        printf("Memory allocation failed!\n");
+        return 1; 
     }
 
-    findDuplicateCharacters(word);
+    printf("Enter Input String :\n");
+    readInputString(inputString);
 
-    free(word);
+    duplicateCharacter(inputString);
+
+    free(inputString);
 
     return 0;
 }
