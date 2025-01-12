@@ -20,3 +20,4 @@ String Manipulation :
 6. Remove Duplicate Character
 7. Rotation of String
 8. Substring Existence
+9. Anagrams of String
