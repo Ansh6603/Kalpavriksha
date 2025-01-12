@@ -15,3 +15,8 @@ String Manipulation :
 1. Duplicate Character
 2. Count Vowel And Consonant
 3. Palindrome 
+4. Count Number of Words
+5. Customer Atoi Function
+6. Remove Duplicate Character
+7. Rotation of String
+8. Substring Existence
