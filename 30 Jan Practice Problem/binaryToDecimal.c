@@ -81,9 +81,9 @@ struct Node* createLinkedList(char* inputString)
     }
 
     struct Node* result = NULL;
-    for (int i = 0; i < iteratorJ; i++) 
+    for (int iteratorI = 0; iteratorI < iteratorJ; iteratorI++) 
     {
-        insertEnd(&result, data[i]);
+        insertEnd(&result, data[iteratorI]);
     }
 
     return result;
