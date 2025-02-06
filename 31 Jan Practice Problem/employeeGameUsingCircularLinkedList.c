@@ -116,7 +116,7 @@ void removeKNode(struct Node** head,int position)
 }
 int main()
 {
-    char *inputString=(char *)malloc(200*sizeof(struct Node));
+    char *inputString=(char *)malloc(200*sizeof(char));
     printf("Enter Linked List \n");
     readInputString(inputString);
     int k;
